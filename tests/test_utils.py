@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from freezegun import freeze_time
 
-from src.utils import export_data_from_xlsx, get_greetings
+from src.utils import export_data_from_xlsx, get_greetings, get_card_information
 
 
 @freeze_time("06:00:19")
@@ -26,7 +26,7 @@ def test_get_greetings_good_evening():
 
 
 @patch("src.utils.datetime")
-def test_get_greeting___(mock_datetime):
+def test_get_greeting_good_night(mock_datetime):
     """Тестирование приветсвия ночью"""
     mock_datetime.now.return_value = datetime(2024, 1, 1, 5, 59, 59)
     assert get_greetings() == "Доброй ночи"
@@ -73,3 +73,27 @@ def test_export_data_from_exl_not_found_file():
     """Тестирует, если файл не найден"""
     path_file = ""
     assert export_data_from_xlsx(path_file) == "Файл не найден"
+
+
+def test_get_card_information_success(df_test):
+    """Тест успешной выдачи информации по заданным параметрам"""
+    result = get_card_information(df_test, '21.12.2021')
+    assert result == {'5091': {'total_spent': 23.6, 'cashback': 0.24}, '7197': {'total_spent': -160.89, 'cashback': -1.61}}
+
+
+def test_get_card_information_not_date(df_test):
+    """Тест успешной выдачи информации по заданным параметрам без указанной даты"""
+    result = get_card_information(df_test)
+    assert result == {'7197': {'cashback': 15.88, 'total_spent': 1588.36}}
+
+
+def test_get_card_information_zero_df():
+    """Тест пустого dataFrame"""
+    result = get_card_information([], '21.12.2021')
+    assert result == 'Произошла ошибка list indices must be integers or slices, not str'
+
+
+def test_get_card_information_not_found_info(df_test):
+    """Тест успешной выдачи информации по заданным параметрам без указанной даты"""
+    result = get_card_information(df_test, '21.12.2022')
+    assert result == {}
