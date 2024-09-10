@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.12"
 pandas = "^2.2.2"
 openpyxl = "^3.1.5"
+requests = "^2.32.3"
+load-dotenv = "^0.1.0"
 
 
 [tool.poetry.group.lint.dependencies]

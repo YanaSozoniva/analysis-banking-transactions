@@ -1,17 +1,12 @@
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-from src.utils import (
-    export_data_from_xlsx,
-    filter_by_date_range,
-    get_card_information,
-    get_greetings,
-    get_top_transactions_by_amount,
-)
+from src.utils import (export_data_from_xlsx, filter_by_date_range, get_card_information, get_currency_rates,
+                       get_greetings, get_top_transactions_by_amount, get_stocks)
 
 
 @freeze_time("06:00:19")
@@ -172,3 +167,93 @@ def test_get_top_transactions_by_amount_zero_df():
     """Тест пустого dataFrame"""
     result = get_top_transactions_by_amount(pd.DataFrame())
     assert result == "Произошла ошибка 'Категория'"
+
+
+def test_get_currency_rates_success():
+    """Тестирует успешное получение курса валют для указанных в настройках пользователя валют"""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "base": "RUB",
+        "date": "2024-09-10",
+        "rates": {"EUR": 0.009988, "USD": 0.011004},
+        "success": True,
+        "timestamp": 1725979864,
+    }
+
+    with patch("src.utils.requests.get", return_value=mock_response):
+        result = get_currency_rates()
+        assert result == [{"currency": "USD", "rate": 90.88}, {"currency": "EUR", "rate": 100.12}]
+
+
+def test_get_currency_rates_incorrect_parameters():
+    """Тестирует запрос, который содержит синтаксическую ошибку или неверные параметры."""
+    mock_response = Mock()
+    mock_response.status_code = 400
+
+    with patch("src.utils.requests.get", return_value=mock_response):
+        with pytest.raises(ValueError, match="Не удалось получить курс валюты"):
+            get_currency_rates()
+
+
+def test_get_currency_rates_no_currency():
+    """Тестирует некорректный результат конвертации валюты"""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "error": {"code": 202, "info": "You have provided one", "type": "invalid_currency_codes"},
+        "success": False,
+}
+
+    with patch("src.utils.requests.get", return_value=mock_response):
+        with pytest.raises(ValueError, match="Нет информации по валютам"):
+            get_currency_rates()
+
+
+def test_get_stocks_success():
+    """Тестирует успешное получение курса валют для указанных в настройках пользователя валют"""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {'data': [
+        {'adj_close': 220.91, 'adj_open': 220.82, 'symbol': 'AAPL', 'date': '2024-09-09T00:00:00+0000'},
+        {'adj_close': 175.4, 'adj_open': 174.53, 'symbol': 'AMZN', 'date': '2024-09-09T00:00:00+0000'},
+        {'adj_close': 148.71, 'adj_open': 152.51, 'symbol': 'GOOGL', 'date': '2024-09-09T00:00:00+0000'},
+        {'adj_close': 405.72, 'adj_open': 407.24, 'symbol': 'MSFT', 'date': '2024-09-09T00:00:00+0000'},
+        {'adj_close': 216.27, 'adj_open': 216.2, 'symbol': 'TSLA', 'date': '2024-09-09T00:00:00+0000'}]}
+
+
+    with patch("src.utils.requests.get", return_value=mock_response):
+        result = get_stocks()
+        assert result == [{'stock': 'AAPL', 'price': 220.91},
+                          {'stock': 'AMZN', 'price': 175.4},
+                          {'stock': 'GOOGL', 'price': 148.71},
+                          {'stock': 'MSFT', 'price': 405.72},
+                          {'stock': 'TSLA', 'price': 216.27}]
+
+
+def test_get_stocks_incorrect_parameters():
+    """Тестирует запрос, который содержит синтаксическую ошибку или неверные параметры."""
+    mock_response = Mock()
+    mock_response.status_code = 400
+
+    with patch("src.utils.requests.get", return_value=mock_response):
+        with pytest.raises(ValueError, match="Не удалось получить курс валюты"):
+            get_currency_rates()
+
+
+def test_get_stocks_no_stock():
+    """Тестирует некорректный результат конвертации валюты"""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "error": {
+            "code": "validation_error",
+            "message": "Request failed with validation error",
+            "context": {
+                "symbols": [
+                    {"key": "missing_symbols", "message": "You did not specify any symbols."}
+                ]}}}
+
+    with patch("src.utils.requests.get", return_value=mock_response):
+        with pytest.raises(ValueError, match="Нет информации по валютам"):
+            get_currency_rates()
