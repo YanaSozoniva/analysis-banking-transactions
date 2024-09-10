@@ -1,10 +1,17 @@
 from datetime import datetime
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-from src.utils import export_data_from_xlsx, get_greetings, get_card_information
+from src.utils import (
+    export_data_from_xlsx,
+    filter_by_date_range,
+    get_card_information,
+    get_greetings,
+    get_top_transactions_by_amount,
+)
 
 
 @freeze_time("06:00:19")
@@ -75,25 +82,93 @@ def test_export_data_from_exl_not_found_file():
     assert export_data_from_xlsx(path_file) == "Файл не найден"
 
 
+def test_filter_by_date_range_by_specified_date(df_test):
+    """Тест успешной фильтрации данных по заданной дате"""
+    result = filter_by_date_range(df_test, "2021-12-21 02:06:15")
+    executed = pd.DataFrame(
+        {
+            "Дата операции": ["21.12.2021 01:06:22", "20.12.2021 12:06:22", "01.12.2021 01:06:22"],
+            "Номер карты": ["*7197", "*7197", "*5091"],
+            "Сумма платежа": [-160.89, 5000, 23.60],
+            "Дата платежа": ["21.12.2021", "20.12.2021", "01.12.2021"],
+            "Категория": ["Переводы", "Развлечения", "Переводы"],
+            "Описание": ["Перевод Кредитная карта. ТП 10.2 RUR", "sevs.eduerp.ru", "Дмитрий Р."],
+        }
+    )
+    assert result.to_dict() == executed.to_dict()
+
+
+def test_filter_by_date_range_not_found_date(df_test):
+    """Тест успешной фильтрации данных, если дата не указана"""
+    result = filter_by_date_range(df_test)
+    executed = {
+        "Дата операции": {4: "08.09.2024 00:12:53"},
+        "Сумма платежа": {4: 1588.36},
+        "Номер карты": {4: "*7197"},
+        "Дата платежа": {4: "08.09.2024"},
+        "Категория": {4: "Госуслуги"},
+        "Описание": {4: "Почта России"},
+    }
+    assert result.to_dict() == executed
+
+
+def test_filter_by_date_range(df_test):
+    """Тест фильтрации данных, если в указанный диапазон нет ни одной операции"""
+    result = filter_by_date_range(df_test, "2022-12-22 02:06:15")
+    executed = pd.DataFrame(
+        {
+            "Дата операции": [],
+            "Номер карты": [],
+            "Сумма платежа": [],
+            "Категория": [],
+            "Описание": [],
+            "Дата платежа": [],
+        }
+    )
+    assert result.to_dict() == executed.to_dict()
+
+
+def test_filter_by_date_range_error():
+    """Тест фильтрации данных при отсутствии столбца с датами"""
+    df = pd.DataFrame({"Номер карты": ["*7197", "*7197", "*5091"], "Сумма платежа": [-160.89, 5000, 23.60]})
+    result = filter_by_date_range(df, "2021-12-21 02:06:15")
+    assert result == "Произошла ошибка 'Дата операции'"
+
+
 def test_get_card_information_success(df_test):
     """Тест успешной выдачи информации по заданным параметрам"""
-    result = get_card_information(df_test, '21.12.2021')
-    assert result == {'5091': {'total_spent': 23.6, 'cashback': 0.24}, '7197': {'total_spent': -160.89, 'cashback': -1.61}}
-
-
-def test_get_card_information_not_date(df_test):
-    """Тест успешной выдачи информации по заданным параметрам без указанной даты"""
     result = get_card_information(df_test)
-    assert result == {'7197': {'cashback': 15.88, 'total_spent': 1588.36}}
+    assert result == [
+        {"last_digits": "5091", "total_spent": 622.18, "cashback": 6.22},
+        {"last_digits": "7197", "total_spent": 6427.47, "cashback": 64.27},
+    ]
 
 
 def test_get_card_information_zero_df():
     """Тест пустого dataFrame"""
-    result = get_card_information([], '21.12.2021')
-    assert result == 'Произошла ошибка list indices must be integers or slices, not str'
+    result = get_card_information(pd.DataFrame())
+    assert result == "Произошла ошибка 'Номер карты'"
 
 
-def test_get_card_information_not_found_info(df_test):
-    """Тест успешной выдачи информации по заданным параметрам без указанной даты"""
-    result = get_card_information(df_test, '21.12.2022')
-    assert result == {}
+def test_get_top_transactions_by_amount_success(df_test):
+    """Тестирование вывода топ-5 транзакций по сумме платежа"""
+    execute = [
+        {"date": "20.12.2021", "amount": 5000.0, "category": "Развлечения", "description": "sevs.eduerp.ru"},
+        {"date": "08.09.2024", "amount": 1588.36, "category": "Госуслуги", "description": "Почта России"},
+        {"date": "31.12.2021", "amount": -645.78, "category": "Такси", "description": "Яндекс Такси"},
+        {
+            "date": "21.12.2021",
+            "amount": -160.89,
+            "category": "Переводы",
+            "description": "Перевод Кредитная карта. ТП 10.2 RUR",
+        },
+        {"date": "01.12.2021", "amount": 23.6, "category": "Переводы", "description": "Дмитрий Р."},
+    ]
+
+    assert get_top_transactions_by_amount(df_test) == execute
+
+
+def test_get_top_transactions_by_amount_zero_df():
+    """Тест пустого dataFrame"""
+    result = get_top_transactions_by_amount(pd.DataFrame())
+    assert result == "Произошла ошибка 'Категория'"
