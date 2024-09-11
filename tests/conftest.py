@@ -27,60 +27,34 @@ def df_test():
         }
     )
 
+
 @pytest.fixture()
 def result_json():
     return {
         "greeting": "Доброе утро",
-        "cards": [{
-            "last_digits": "4556",
-            "total_spent": 2547.1,
-            "cashback": 25.47},
-            {
-            "last_digits": "5091",
-            "total_spent": 10133.09,
-            "cashback": 101.33},
-            {
-            "last_digits": "7197",
-            "total_spent": 12689.61,
-            "cashback": 126.9}],
-        "top_transactions": [{
-            "date": "16.12.2021",
-            "amount": -14216.42,
-            "category": "ЖКХ",
-            "description": "ЖКУ Квартира"},
-            {"date": "02.12.2021",
-             "amount": -5510.8,
-             "category": "Каршеринг",
-             "description": "Ситидрайв"},
-            {"date": "14.12.2021",
-             "amount": -5000.0,
-             "category": "Переводы",
-             "description": "Светлана Т."},
-            {"date": "05.12.2021",
-             "amount": 3500.0,
-             "category": "Пополнения",
-             "description": "Внесение наличных через банкомат Тинькофф"},
-            {"date": "04.12.2021",
-             "amount": -3499.0,
-             "category": "Электроника и техника",
-             "description": "DNS"}
+        "cards": [
+            {"last_digits": "4556", "total_spent": 2547.1, "cashback": 25.47},
+            {"last_digits": "5091", "total_spent": 10133.09, "cashback": 101.33},
+            {"last_digits": "7197", "total_spent": 12689.61, "cashback": 126.9},
         ],
-        "currency_rates": [{
-            "currency": "USD",
-            "rate": 91.0},
-            {"currency": "EUR",
-             "rate": 100.52}
+        "top_transactions": [
+            {"date": "16.12.2021", "amount": -14216.42, "category": "ЖКХ", "description": "ЖКУ Квартира"},
+            {"date": "02.12.2021", "amount": -5510.8, "category": "Каршеринг", "description": "Ситидрайв"},
+            {"date": "14.12.2021", "amount": -5000.0, "category": "Переводы", "description": "Светлана Т."},
+            {
+                "date": "05.12.2021",
+                "amount": 3500.0,
+                "category": "Пополнения",
+                "description": "Внесение наличных через банкомат Тинькофф",
+            },
+            {"date": "04.12.2021", "amount": -3499.0, "category": "Электроника и техника", "description": "DNS"},
         ],
+        "currency_rates": [{"currency": "USD", "rate": 91.0}, {"currency": "EUR", "rate": 100.52}],
         "stock_prices": [
-            {"stock": "AAPL",
-             "price": 220.11},
-            {"stock": "AMZN",
-             "price": 179.55},
-            {"stock": "GOOGL",
-             "price": 148.66},
-            {"stock": "MSFT",
-             "price": 414.2},
-            {"stock": "TSLA",
-             "price": 226.17}
-        ]
+            {"stock": "AAPL", "price": 220.11},
+            {"stock": "AMZN", "price": 179.55},
+            {"stock": "GOOGL", "price": 148.66},
+            {"stock": "MSFT", "price": 414.2},
+            {"stock": "TSLA", "price": 226.17},
+        ],
     }

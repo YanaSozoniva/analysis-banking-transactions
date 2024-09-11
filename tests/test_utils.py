@@ -6,7 +6,7 @@ import pytest
 from freezegun import freeze_time
 
 from src.utils import (export_data_from_xlsx, filter_by_date_range, get_card_information, get_currency_rates,
-                       get_greetings, get_top_transactions_by_amount, get_stocks)
+                       get_greetings, get_stocks, get_top_transactions_by_amount)
 
 
 @freeze_time("06:00:19")
@@ -203,7 +203,7 @@ def test_get_currency_rates_no_currency():
     mock_response.json.return_value = {
         "error": {"code": 202, "info": "You have provided one", "type": "invalid_currency_codes"},
         "success": False,
-}
+    }
 
     with patch("src.utils.requests.get", return_value=mock_response):
         with pytest.raises(ValueError, match="Нет информации по валютам"):
@@ -214,21 +214,25 @@ def test_get_stocks_success():
     """Тестирует успешное получение курса валют для указанных в настройках пользователя валют"""
     mock_response = Mock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {'data': [
-        {'adj_close': 220.91, 'adj_open': 220.82, 'symbol': 'AAPL', 'date': '2024-09-09T00:00:00+0000'},
-        {'adj_close': 175.4, 'adj_open': 174.53, 'symbol': 'AMZN', 'date': '2024-09-09T00:00:00+0000'},
-        {'adj_close': 148.71, 'adj_open': 152.51, 'symbol': 'GOOGL', 'date': '2024-09-09T00:00:00+0000'},
-        {'adj_close': 405.72, 'adj_open': 407.24, 'symbol': 'MSFT', 'date': '2024-09-09T00:00:00+0000'},
-        {'adj_close': 216.27, 'adj_open': 216.2, 'symbol': 'TSLA', 'date': '2024-09-09T00:00:00+0000'}]}
-
+    mock_response.json.return_value = {
+        "data": [
+            {"adj_close": 220.91, "adj_open": 220.82, "symbol": "AAPL", "date": "2024-09-09T00:00:00+0000"},
+            {"adj_close": 175.4, "adj_open": 174.53, "symbol": "AMZN", "date": "2024-09-09T00:00:00+0000"},
+            {"adj_close": 148.71, "adj_open": 152.51, "symbol": "GOOGL", "date": "2024-09-09T00:00:00+0000"},
+            {"adj_close": 405.72, "adj_open": 407.24, "symbol": "MSFT", "date": "2024-09-09T00:00:00+0000"},
+            {"adj_close": 216.27, "adj_open": 216.2, "symbol": "TSLA", "date": "2024-09-09T00:00:00+0000"},
+        ]
+    }
 
     with patch("src.utils.requests.get", return_value=mock_response):
         result = get_stocks()
-        assert result == [{'stock': 'AAPL', 'price': 220.91},
-                          {'stock': 'AMZN', 'price': 175.4},
-                          {'stock': 'GOOGL', 'price': 148.71},
-                          {'stock': 'MSFT', 'price': 405.72},
-                          {'stock': 'TSLA', 'price': 216.27}]
+        assert result == [
+            {"stock": "AAPL", "price": 220.91},
+            {"stock": "AMZN", "price": 175.4},
+            {"stock": "GOOGL", "price": 148.71},
+            {"stock": "MSFT", "price": 405.72},
+            {"stock": "TSLA", "price": 216.27},
+        ]
 
 
 def test_get_stocks_incorrect_parameters():
@@ -249,10 +253,9 @@ def test_get_stocks_no_stock():
         "error": {
             "code": "validation_error",
             "message": "Request failed with validation error",
-            "context": {
-                "symbols": [
-                    {"key": "missing_symbols", "message": "You did not specify any symbols."}
-                ]}}}
+            "context": {"symbols": [{"key": "missing_symbols", "message": "You did not specify any symbols."}]},
+        }
+    }
 
     with patch("src.utils.requests.get", return_value=mock_response):
         with pytest.raises(ValueError, match="Нет информации по валютам"):
