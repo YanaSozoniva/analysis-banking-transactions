@@ -1,14 +1,14 @@
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import getcwd
 from os.path import dirname, exists
+from typing import Optional
 
 import pandas as pd
 import requests
 from dotenv import load_dotenv
-from pandas import DataFrame
 
 load_dotenv()
 API_KEY_CURRENCY = os.getenv("API_KEY_CURRENCY")
@@ -18,7 +18,6 @@ PATH_LOG = dirname(getcwd())
 
 logging.basicConfig(
     encoding="utf-8",
-    filemode="w",
     filename=PATH_LOG + r"\logs\utils.log",
     format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
     level=logging.DEBUG,
@@ -47,7 +46,7 @@ def get_greetings() -> str:
     return greetings
 
 
-def export_data_from_xlsx(file_name: str) -> DataFrame | str:
+def export_data_from_xlsx(file_name: str) -> pd.DataFrame | str:
     """Функция считывание финансовых операций из XLSX-файла"""
     logger.info("Проверка существования xlsx-файла")
     if not exists(file_name):
@@ -63,10 +62,14 @@ def export_data_from_xlsx(file_name: str) -> DataFrame | str:
         return reader
 
 
-def filter_by_date_range(df: DataFrame, date: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")) -> DataFrame | str:
+def filter_by_date_range(df: pd.DataFrame, date: Optional[str] = None, count_month: int = 1) -> pd.DataFrame | str:
     """Фильтрует данные с начала месяца, на который выпадает входящая дата,
-    по входящую дату (по умолчанию берется текущая дата)."""
+    по входящую дату (по умолчанию берется текущая дата) или фильтрует на указанное количество месяцев."""
     try:
+        logger.info("проверка ввода даты")
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         logger.info("Удаляем значения nan из столбца 'Дата операции'")
         df["Дата операции"].dropna(inplace=True)
 
@@ -74,9 +77,11 @@ def filter_by_date_range(df: DataFrame, date: str = datetime.now().strftime("%Y-
         date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         logger.info("Определяем начало месяца")
         start_date = date_obj.replace(day=1, hour=0, minute=0, second=0)
+        if count_month > 1:
+            start_date = date_obj - pd.DateOffset(months=count_month)
 
         logger.info(
-            "Преобразовываем столбец с датами в объект datetime" " и фильтруем данные по дате операции с начала месяца"
+            "Преобразовываем столбец с датами в объект datetime" " и фильтруем данные по дате в указанном диапазоне"
         )
         for index, row in df.iterrows():
             row.loc["Дата операции"] = datetime.strptime(row.loc["Дата операции"], "%d.%m.%Y %H:%M:%S")
@@ -91,14 +96,15 @@ def filter_by_date_range(df: DataFrame, date: str = datetime.now().strftime("%Y-
         return df_by_date
 
 
-def get_card_information(df: DataFrame) -> list[dict] | str:
+def get_card_information(df: pd.DataFrame) -> list[dict] | str:
     """Функция выводит информацию по каждой карте (последние 4 цифры карты,
     общая сумма расходов, кешбэк (1 рубль на каждые 100 рублей)) с начала месяца по заданную дату
     (по умолчанию берется текущая дата)."""
     try:
         cards = []
 
-        logger.info("Группировка по номеру карты и нахождение суммы платежей по каждой карте")
+        logger.info("Группировка по номеру карты и подсчет расходов по каждой карте")
+        df = df[df["Сумма платежа"] < 0].copy()
         group_by_card = df.groupby("Номер карты", dropna=True).agg({"Сумма платежа": "sum"})
 
         logger.info("формирования словаря с информацией по карте")
@@ -118,7 +124,7 @@ def get_card_information(df: DataFrame) -> list[dict] | str:
         return cards
 
 
-def get_top_transactions_by_amount(df: DataFrame) -> list[dict] | str:
+def get_top_transactions_by_amount(df: pd.DataFrame) -> list[dict] | str:
     """Функция возвращает Топ-5 транзакций по сумме платежа"""
     try:
         top_transactions = []
@@ -222,4 +228,26 @@ def get_stocks() -> list[dict]:
 
 
 # if __name__ == "__main__":
-#     print(get_greetings())
+#     df = pd.DataFrame(
+#         {
+#             "Дата операции": [
+#                 "21.12.2021 01:06:22",
+#                 "20.12.2021 12:06:22",
+#                 "01.12.2021 01:06:22",
+#                 "31.12.2021 00:12:53",
+#                 "08.09.2024 00:12:53",
+#             ],
+#             "Номер карты": ["*7197", "*7197", "*5091", "*5091", "*7197"],
+#             "Сумма платежа": [-160.89, 5000, 23.60, -645.78, 1588.36],
+#             "Категория": ["Переводы", "Развлечения", "Переводы", "Такси", "Госуслуги"],
+#             "Описание": [
+#                 "Перевод Кредитная карта. ТП 10.2 RUR",
+#                 "sevs.eduerp.ru",
+#                 "Дмитрий Р.",
+#                 "Яндекс Такси",
+#                 "Почта России",
+#             ],
+#             "Дата платежа": ["21.12.2021", "20.12.2021", "01.12.2021", "31.12.2021", "08.09.2024"],
+#         }
+#     )
+#     print(filter_by_date_range(df, "2022-01-21 02:02:02", 3).to_dict())

@@ -1,9 +1,8 @@
 import logging
 from os import getcwd
-from os.path import dirname, exists
+from os.path import dirname
 from typing import Iterable
 
-import pandas as pd
 from pandas import DataFrame
 
 PATH_LOG = dirname(getcwd())
@@ -31,7 +30,6 @@ def search_transfers_to_individuals(df: DataFrame) -> Iterable:
     except Exception as e:
         logger.error(f"Произошла ошибка {e}")
         return f"Произошла ошибка {e}"
-
 
 
 # if __name__ == "__main__":

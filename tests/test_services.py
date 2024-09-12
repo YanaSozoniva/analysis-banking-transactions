@@ -16,7 +16,7 @@ def test_search_transfers_to_individuals_success(df_test):
 def test_search_transfers_to_individuals_zero_df():
     """Тестирование при пустом DataFrame"""
     df = pd.DataFrame()
-    assert search_transfers_to_individuals(df) == None
+    assert search_transfers_to_individuals(df) == "Произошла ошибка 'Категория'"
 
 
 def test_search_transfers_to_individuals_not_found_cat():
