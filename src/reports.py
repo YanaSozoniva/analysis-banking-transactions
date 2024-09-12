@@ -1,11 +1,14 @@
 import logging
+import json
 from os import getcwd
-from os.path import dirname
+from os.path import dirname, join
 from typing import Optional
+from functools import wraps
+from typing import Any, Callable
 
 import pandas as pd
 
-from src.utils import export_data_from_xlsx, filter_by_date_range
+from src.utils import filter_by_date_range
 
 pd.options.mode.chained_assignment = None
 
@@ -20,6 +23,28 @@ logging.basicConfig(
 logger = logging.getLogger("reports")
 
 
+def write_to_file(file_name: str = 'reports.json') -> Callable:
+    """Декоратор для функций-отчетов, записывающий в файл результат, который возвращает функция, формирующая отчет."""
+
+    def wrapper(func: Any) -> Callable:
+        @wraps(func)
+        def inner(*args: Any, **kwargs: Any) -> Any:
+
+            result = func(*args, **kwargs)
+            path_f = r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data'
+            full_path = join(path_f, file_name)
+
+            with open(full_path, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=4, ensure_ascii=False)
+
+            return result
+
+        return inner
+
+    return wrapper
+
+
+@write_to_file()
 def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame | str:
     """Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты)
     Если дата не передана, то берется текущая дата"""
@@ -49,6 +74,8 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     except Exception as e:
         logger.error(f"произошла ошибка {e}")
         return f"произошла ошибка {e}"
+
+
 
 
 # if __name__ == '__main__':

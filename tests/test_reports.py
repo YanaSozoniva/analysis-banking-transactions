@@ -1,6 +1,10 @@
-import pandas as pd
+import json
+import tempfile
 
-from src.reports import spending_by_weekday
+import pandas as pd
+import pytest
+
+from src.reports import spending_by_weekday, write_to_file
 
 
 def test_spending_by_weekday_success(df_test):
@@ -21,3 +25,46 @@ def test_spending_by_weekday_zero_df():
     """Тестирование при пустом DataFrame"""
     df = pd.DataFrame()
     assert spending_by_weekday(df) == "произошла ошибка 'str' object has no attribute 'loc'"
+
+
+def test_write_to_file():
+    """Тестирует выполнение декорированной функции"""
+
+    @write_to_file()
+    def my_function(x, y):
+        return {'x': x, 'y': y}
+
+    result = my_function(2, 3)
+    assert result == {'x': 2, 'y': 3}
+
+
+def test_write_to_file_success_default_file():
+    """Тестирует запись в файл (по умолчанию) после успешного выполнения"""
+
+    @write_to_file()
+    def my_function(x, y):
+        return {'x': x, 'y': y}
+
+    my_function(2, 3)
+
+    file_path = r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data\reports.json'
+    with open(file_path, "r", encoding="utf-8") as file:
+        result = json.load(file)
+
+    assert result == {"x": 2, "y": 3}
+
+
+def test_write_to_file_success():
+    """Тестирует запись в указанный файл после успешного выполнения"""
+
+    @write_to_file('test_reports.json')
+    def my_function(x, y):
+        return {'x': x, 'y': y}
+
+    my_function(2, 3)
+
+    file_path = r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data\test_reports.json'
+    with open(file_path, "r", encoding="utf-8") as file:
+        result = json.load(file)
+
+    assert result == {"x": 2, "y": 3}

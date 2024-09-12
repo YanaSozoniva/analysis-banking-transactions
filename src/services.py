@@ -3,6 +3,7 @@ from os import getcwd
 from os.path import dirname
 from typing import Iterable
 
+
 from pandas import DataFrame
 
 PATH_LOG = dirname(getcwd())
@@ -34,8 +35,8 @@ def search_transfers_to_individuals(df: DataFrame) -> Iterable:
 
 # if __name__ == "__main__":
 #     data = {
-#         "Категория": ["Супермаркеты", "Фастфуд", "Супермаркеты", "Госуслуги"],
+#         "Категория": ["Супермаркеты", "Фастфуд", "Супермаркеты", "Переводы"],
 #         "Описание": ["Иванов И.", "Петров П.", "Сидоров.", "Петров П."],
 #     }
-#     df = pd.DataFrame(data)
+#     df = pandas.DataFrame(data)
 #     print(search_transfers_to_individuals(df))
