@@ -1,10 +1,9 @@
-import logging
 import json
+import logging
+from functools import wraps
 from os import getcwd
 from os.path import dirname, join
-from typing import Optional
-from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, Iterable, Optional
 
 import pandas as pd
 
@@ -16,6 +15,7 @@ PATH_LOG = dirname(getcwd())
 
 logging.basicConfig(
     encoding="utf-8",
+    filemode="w",
     filename=PATH_LOG + r"\logs\reports.log",
     format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
     level=logging.DEBUG,
@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger("reports")
 
 
-def write_to_file(file_name: str = 'reports.json') -> Callable:
+def write_to_file(file_name: str = "reports.json") -> Callable:
     """Декоратор для функций-отчетов, записывающий в файл результат, который возвращает функция, формирующая отчет."""
 
     def wrapper(func: Any) -> Callable:
@@ -31,7 +31,7 @@ def write_to_file(file_name: str = 'reports.json') -> Callable:
         def inner(*args: Any, **kwargs: Any) -> Any:
 
             result = func(*args, **kwargs)
-            path_f = r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data'
+            path_f = r"C:\Users\user\Desktop\skyPro\ analysis banking transactions\data"
             full_path = join(path_f, file_name)
 
             with open(full_path, "w", encoding="utf-8") as f:
@@ -45,7 +45,7 @@ def write_to_file(file_name: str = 'reports.json') -> Callable:
 
 
 @write_to_file()
-def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame | str:
+def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> Iterable:
     """Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты)
     Если дата не передана, то берется текущая дата"""
     try:
@@ -73,13 +73,11 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
     except Exception as e:
         logger.error(f"произошла ошибка {e}")
-        return f"произошла ошибка {e}"
-
-
 
 
 # if __name__ == '__main__':
-#     # tran = export_data_from_xlsx(r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data\operations.xlsx')
+#     # tran = export_data_from_xlsx(r'C:\Users\user\Desktop\skyPro\ analysis banking
+#     transactions\data\operations.xlsx')
 #     tran = pd.DataFrame(
 #         {
 #             "Дата операции": [

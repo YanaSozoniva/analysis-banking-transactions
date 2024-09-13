@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from os import getcwd
 from os.path import dirname, exists
 from typing import Optional
@@ -18,6 +18,7 @@ PATH_LOG = dirname(getcwd())
 
 logging.basicConfig(
     encoding="utf-8",
+    filemode="w",
     filename=PATH_LOG + r"\logs\utils.log",
     format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
     level=logging.DEBUG,
@@ -98,8 +99,7 @@ def filter_by_date_range(df: pd.DataFrame, date: Optional[str] = None, count_mon
 
 def get_card_information(df: pd.DataFrame) -> list[dict] | str:
     """Функция выводит информацию по каждой карте (последние 4 цифры карты,
-    общая сумма расходов, кешбэк (1 рубль на каждые 100 рублей)) с начала месяца по заданную дату
-    (по умолчанию берется текущая дата)."""
+    общая сумма расходов, кешбэк (1 рубль на каждые 100 рублей))"""
     try:
         cards = []
 

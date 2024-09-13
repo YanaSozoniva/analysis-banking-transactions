@@ -3,13 +3,13 @@ from os import getcwd
 from os.path import dirname
 from typing import Iterable
 
-
 from pandas import DataFrame
 
 PATH_LOG = dirname(getcwd())
 
 logging.basicConfig(
     encoding="utf-8",
+    filemode="w",
     filename=PATH_LOG + r"\logs\services.log",
     format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
     level=logging.DEBUG,
@@ -31,6 +31,9 @@ def search_transfers_to_individuals(df: DataFrame) -> Iterable:
     except Exception as e:
         logger.error(f"Произошла ошибка {e}")
         return f"Произошла ошибка {e}"
+
+
+
 
 
 # if __name__ == "__main__":
