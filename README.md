@@ -15,6 +15,11 @@ git@github.com:YanaSozoniva/analysis-banking-transactions.git
 
 ```
 
+## Запуск приложения:
+
+Введите команду: python main.py
+
+
 ## Разработанные функции и примеры работы с ними:
 ### Модуль utils
 #### Функция get_greetings():

@@ -8,19 +8,11 @@ from typing import Any, Callable, Iterable, Optional
 import pandas as pd
 
 from src.utils import filter_by_date_range
+from src.logger import logger_setup
+
+logger = logger_setup()
 
 pd.options.mode.chained_assignment = None
-
-PATH_LOG = dirname(getcwd())
-
-logging.basicConfig(
-    encoding="utf-8",
-    filemode="w",
-    filename=PATH_LOG + r"\logs\reports.log",
-    format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
-    level=logging.DEBUG,
-)
-logger = logging.getLogger("reports")
 
 
 def write_to_file(file_name: str = "reports.json") -> Callable:

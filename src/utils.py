@@ -1,9 +1,9 @@
 import json
-import logging
+
 import os
 from datetime import datetime
-from os import getcwd
-from os.path import dirname, exists
+
+from os.path import  exists
 from typing import Optional
 
 import pandas as pd
@@ -14,17 +14,9 @@ load_dotenv()
 API_KEY_CURRENCY = os.getenv("API_KEY_CURRENCY")
 API_KEY_STOCK = os.getenv("API_KEY_STOCK")
 
-PATH_LOG = dirname(getcwd())
+from src.logger import logger_setup
 
-logging.basicConfig(
-    encoding="utf-8",
-    filemode="w",
-    filename=PATH_LOG + r"\logs\utils.log",
-    format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
-    level=logging.DEBUG,
-)
-
-logger = logging.getLogger("utils")
+logger = logger_setup()
 
 
 def get_greetings() -> str:
@@ -159,7 +151,7 @@ def get_currency_rates() -> list[dict]:
     """Функция обращается к внешнему API для получения текущего курса валют, указанных в пользовательских настройках"""
     logger.info("Открытие файла с пользовательскими настройками")
     with open(
-        r"C:\Users\user\Desktop\skyPro\ analysis banking transactions\user_settings.json", encoding="utf-8"
+        r"user_settings.json", encoding="utf-8"
     ) as json_file:
         reader = json.load(json_file)
         symbols = reader["user_currencies"]
@@ -193,7 +185,7 @@ def get_stocks() -> list[dict]:
     """Функция обращается к внешнему API для получения стоимости акций, указанных в пользовательских настройках"""
     logger.info("Открытие файла с пользовательскими настройками")
     with open(
-        r"C:\Users\user\Desktop\skyPro\ analysis banking transactions\user_settings.json", encoding="utf-8"
+        r"user_settings.json", encoding="utf-8"
     ) as json_file:
         reader = json.load(json_file)
         symbols = reader["user_stocks"]
@@ -227,27 +219,27 @@ def get_stocks() -> list[dict]:
     return stock_prices
 
 
-# if __name__ == "__main__":
-#     df = pd.DataFrame(
-#         {
-#             "Дата операции": [
-#                 "21.12.2021 01:06:22",
-#                 "20.12.2021 12:06:22",
-#                 "01.12.2021 01:06:22",
-#                 "31.12.2021 00:12:53",
-#                 "08.09.2024 00:12:53",
-#             ],
-#             "Номер карты": ["*7197", "*7197", "*5091", "*5091", "*7197"],
-#             "Сумма платежа": [-160.89, 5000, 23.60, -645.78, 1588.36],
-#             "Категория": ["Переводы", "Развлечения", "Переводы", "Такси", "Госуслуги"],
-#             "Описание": [
-#                 "Перевод Кредитная карта. ТП 10.2 RUR",
-#                 "sevs.eduerp.ru",
-#                 "Дмитрий Р.",
-#                 "Яндекс Такси",
-#                 "Почта России",
-#             ],
-#             "Дата платежа": ["21.12.2021", "20.12.2021", "01.12.2021", "31.12.2021", "08.09.2024"],
-#         }
-#     )
-#     print(filter_by_date_range(df, "2022-01-21 02:02:02", 3).to_dict())
+if __name__ == "__main__":
+    df = pd.DataFrame(
+        {
+            "Дата операции": [
+                "21.12.2021 01:06:22",
+                "20.12.2021 12:06:22",
+                "01.12.2021 01:06:22",
+                "31.12.2021 00:12:53",
+                "08.09.2024 00:12:53",
+            ],
+            "Номер карты": ["*7197", "*7197", "*5091", "*5091", "*7197"],
+            "Сумма платежа": [-160.89, 5000, 23.60, -645.78, 1588.36],
+            "Категория": ["Переводы", "Развлечения", "Переводы", "Такси", "Госуслуги"],
+            "Описание": [
+                "Перевод Кредитная карта. ТП 10.2 RUR",
+                "sevs.eduerp.ru",
+                "Дмитрий Р.",
+                "Яндекс Такси",
+                "Почта России",
+            ],
+            "Дата платежа": ["21.12.2021", "20.12.2021", "01.12.2021", "31.12.2021", "08.09.2024"],
+        }
+    )
+    print(get_stocks())

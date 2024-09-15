@@ -1,23 +1,13 @@
 import json
-import logging
-from os import getcwd
-from os.path import dirname
+
 from typing import Iterable
 
 from src.utils import (export_data_from_xlsx, filter_by_date_range, get_card_information, get_currency_rates,
                        get_greetings, get_stocks, get_top_transactions_by_amount)
 
-PATH_LOG = dirname(getcwd())
+from src.logger import logger_setup
 
-logging.basicConfig(
-    encoding="utf-8",
-    filemode="w",
-    filename=PATH_LOG + r"\logs\views.log",
-    format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
-    level=logging.DEBUG,
-)
-
-logger = logging.getLogger("views")
+logger = logger_setup()
 
 
 def get_data_for_home_page(date: str) -> Iterable | str:
@@ -27,7 +17,7 @@ def get_data_for_home_page(date: str) -> Iterable | str:
         logger.info("Получение данных из excel, фильтрация данных")
         main_info = {}
         card_info = export_data_from_xlsx(
-            r"C:\Users\user\Desktop\skyPro\ analysis banking transactions\data\operations.xlsx"
+            r"\data\operations.xlsx"
         )
         card_info = filter_by_date_range(card_info, date)
         card_info_list = get_card_information(card_info)

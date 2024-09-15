@@ -1,21 +1,11 @@
-import logging
-from os import getcwd
-from os.path import dirname
+
 from typing import Iterable
 
 from pandas import DataFrame
 
-PATH_LOG = dirname(getcwd())
+from src.logger import logger_setup
 
-logging.basicConfig(
-    encoding="utf-8",
-    filemode="w",
-    filename=PATH_LOG + r"\logs\services.log",
-    format="%(asctime)s:%(filename)s:%(funcName)s %(levelname)s: %(message)s",
-    level=logging.DEBUG,
-)
-
-logger = logging.getLogger("services")
+logger = logger_setup()
 
 
 def search_transfers_to_individuals(df: DataFrame) -> Iterable:
