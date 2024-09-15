@@ -31,10 +31,8 @@ def write_to_file(file_name: str = "reports.json") -> Callable:
         def inner(*args: Any, **kwargs: Any) -> Any:
 
             result = func(*args, **kwargs)
-            path_f = r"C:\Users\user\Desktop\skyPro\ analysis banking transactions\data"
-            full_path = join(path_f, file_name)
 
-            with open(full_path, "w", encoding="utf-8") as f:
+            with open(file_name, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=4, ensure_ascii=False)
 
             return result

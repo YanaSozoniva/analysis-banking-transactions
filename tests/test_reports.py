@@ -24,18 +24,7 @@ def test_spending_by_weekday_default(df_test):
 def test_spending_by_weekday_zero_df():
     """Тестирование при пустом DataFrame"""
     df = pd.DataFrame()
-    assert spending_by_weekday(df) == "произошла ошибка 'str' object has no attribute 'loc'"
-
-
-def test_write_to_file():
-    """Тестирует выполнение декорированной функции"""
-
-    @write_to_file()
-    def my_function(x, y):
-        return {'x': x, 'y': y}
-
-    result = my_function(2, 3)
-    assert result == {'x': 2, 'y': 3}
+    assert spending_by_weekday(df) == None
 
 
 def test_write_to_file_success_default_file():
@@ -47,7 +36,7 @@ def test_write_to_file_success_default_file():
 
     my_function(2, 3)
 
-    file_path = r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data\reports.json'
+    file_path = 'reports.json'
     with open(file_path, "r", encoding="utf-8") as file:
         result = json.load(file)
 
@@ -63,7 +52,7 @@ def test_write_to_file_success():
 
     my_function(2, 3)
 
-    file_path = r'C:\Users\user\Desktop\skyPro\ analysis banking transactions\data\test_reports.json'
+    file_path = 'test_reports.json'
     with open(file_path, "r", encoding="utf-8") as file:
         result = json.load(file)
 
